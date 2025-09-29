@@ -1,45 +1,19 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, Alert, TouchableOpacity } from "react-native";
+import LoginScreen from "./Login";
+import SignupScreen from "./SignUp";
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+export default function App() {
+  const [step, setStep] = useState(1)
+  const onClickOnSignout = () =>{
+    setStep(1)
+  }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+    <View style={{ padding: 20 }}>
+      <Button onPress={()=>setStep(1)} title="SignUp" />
+      <Button onPress={()=>setStep(2)} title="Login" />
+      {step === 2 ? <LoginScreen  onClickOnSignout={onClickOnSignout}/> : <SignupScreen /> }
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
