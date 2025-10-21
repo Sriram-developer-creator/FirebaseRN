@@ -2,16 +2,18 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert } from "react-native";
 import functions from "@react-native-firebase/functions";
 
-export default function SignupScreen() {
+export default function SignupScreen({onClickOnGoToLogin}: any) {
   const [mobile, setMobile] = useState("");
   const [iqama, setIqama] = useState("");
+  const [referenceId, setReferenceId] = useState("");
+  const [sessionId, setSessionId] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [step, setStep] = useState("MOBILE");
 
   async function callSignup(payload) {
     if (__DEV__) {
-      functions().useFunctionsEmulator("http://10.0.2.2:5001"); // Android emulator
+      functions().useFunctionsEmulator("http://10.0.2.2:5001");
     }
     return await functions().httpsCallable("signupUser")(payload);
   }
@@ -37,6 +39,7 @@ export default function SignupScreen() {
       console.log('res', res)
       if (res.data.status === "OTP_SENT") {
         setStep("OTP");
+        setReferenceId(res.data.referenceId)
         Alert.alert("OTP Sent", "Check your phone");
       }
     } catch (err) {
@@ -51,11 +54,12 @@ export default function SignupScreen() {
     }
 
     try {
-      const res = await callSignup({ mobile, iqama, otp });
+      const res = await callSignup({ mobile, iqama, otp, referenceId });
       console.log('res 2', res)
 
       if (res.data.status === "OTP_VERIFIED") {
         setStep("PASSWORD");
+        setSessionId(res.data.sessionId);
         Alert.alert("OTP Verified", "Now set your password");
       }
     } catch (err) {
@@ -70,7 +74,7 @@ export default function SignupScreen() {
     }
 
     try {
-      const res = await callSignup({ mobile, iqama, otp, password });
+      const res = await callSignup({ mobile, iqama, otp, password, sessionId });
       console.log('res 3', res)
       if (res.data.status === "USER_CREATED") {
         Alert.alert("Success", "User created successfully");
@@ -91,12 +95,13 @@ export default function SignupScreen() {
     } else if (msg.includes("Too many attempts")) {
       Alert.alert("Error", "Too many attempts. Try again later.");
     } else {
-      Alert.alert("Error", msg);
+      Alert.alert("User Already Exist", msg, [{
+        text: 'login',
+        onPress: ()=>{
+          onClickOnGoToLogin()
+        }
+      }]);
     }
-  }
-
-  function onPressOnBack(){
-
   }
 
   return (
